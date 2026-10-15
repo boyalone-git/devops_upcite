@@ -1,10 +1,22 @@
 package com.projet.annuaire;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class Association {
+
     private String id;
+
+    @NotBlank(message = "Le nom est obligatoire")
     private String nom;
+
+    @NotBlank(message = "Le domaine est obligatoire")
     private String domaine;
+
     private String adresse;
+
+    // Constructeur vide : nécessaire pour que Jackson puisse créer l'objet à partir du JSON
+    public Association() {
+    }
 
     public Association(String id, String nom, String domaine, String adresse) {
         this.id = id;
