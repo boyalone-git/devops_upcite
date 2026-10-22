@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  annuaire:
+    build: 
+      context: ./annuaire
+    ports:
+      - "8080:8080"
+    container_name: service-annuaire
+
+  benevoles:
+    build: 
+      context: ./benevoles
+    ports:
+      - "8081:8081"
+    container_name: service-benevoles
