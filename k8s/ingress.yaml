@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: solidarite-gateway
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          - path: /api/benevoles
+            pathType: Prefix
+            backend:
+              service:
+                name: service-benevoles
+                port:
+                  number: 8081
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: service-annuaire
+                port:
+                  number: 8080
