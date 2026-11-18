@@ -1,26 +1,57 @@
 package com.projet.annuaire;
 
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClient;
 
-
+import java.util.Arrays;
 import java.util.List;
-import jakarta.validation.Valid;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/associations")
 public class AnnuaireController {
 
-    // Point 4 : Injection du Service
     private final AnnuaireService annuaireService;
+    private final RestClient restClient;
 
-    public AnnuaireController(AnnuaireService annuaireService) {
+    public AnnuaireController(
+            AnnuaireService annuaireService,
+            @Value("${benevoles.service.url:http://service-benevoles:8081}") String benevolesUrl) {
         this.annuaireService = annuaireService;
+        this.restClient = RestClient.builder().baseUrl(benevolesUrl).build();
     }
 
     @GetMapping
-    public List<Association> getAssociations() {
+    public List getAssociations() {
         return annuaireService.getToutesLesAssociations();
+    }
+
+    @GetMapping("/synthese")
+    public Map getSyntheseInterServices() {
+        List associations = annuaireService.getToutesLesAssociations();
+        try {
+            Object[] benevolesArray = restClient.get()
+                    .uri("/api/benevoles")
+                    .retrieve()
+                    .body(Object[].class);
+            List benevoles = benevolesArray != null ? Arrays.asList(benevolesArray) : List.of();
+            return Map.of(
+                    "statutCommunication", "OK (service-annuaire vers service-benevoles:8081)",
+                    "totalAssociations", associations.size(),
+                    "totalBenevoles", benevoles.size(),
+                    "associations", associations,
+                    "benevoles", benevoles
+            );
+        } catch (Exception e) {
+            return Map.of(
+                    "statutCommunication", "ERREUR : " + e.getMessage(),
+                    "associations", associations,
+                    "benevoles", List.of()
+            );
+        }
     }
 
     @GetMapping("/{id}")

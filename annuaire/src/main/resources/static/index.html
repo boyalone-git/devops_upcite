@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solidarité Arrivants — Plateforme Microservices</title>
+  <style>
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; background: #f4f6f9; color: #1f2937; }
+    header { background: #1e3a8a; color: white; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 1.4rem; }
+    .badge { background: #10b981; color: white; padding: 0.4rem 0.8rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; }
+    .badge.err { background: #ef4444; }
+    main { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 768px) { main { grid-template-columns: 1fr; } }
+    .card { background: white; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    h2 { margin-top: 0; color: #1e3a8a; font-size: 1.15rem; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+    form { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.2rem; }
+    input { padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; }
+    button { padding: 0.65rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .sub { font-size: 0.85rem; color: #6b7280; }
+    .del { background: #ef4444; padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+    .del:hover { background: #dc2626; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Solidarité Arrivants — Kubernetes Gateway</h1>
+    <span id="comm-status" class="badge">Vérification inter-services...</span>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Associations (Microservice Annuaire)</h2>
+      <form id="form-asso">
+        <input id="asso-nom" placeholder="Nom de l'association (ex: Secours Populaire)" required />
+        <input id="asso-domaine" placeholder="Domaine (ex: Aide alimentaire)" required />
+        <input id="asso-adresse" placeholder="Ville / Adresse (ex: Paris)" />
+        <button type="submit">Ajouter l'association</button>
+      </form>
+      <ul id="list-assos"></ul>
+    </section>
+
+    <section class="card">
+      <h2>Bénévoles (Microservice Bénévoles + PostgreSQL)</h2>
+      <form id="form-ben">
+        <input id="ben-nom" placeholder="Nom du bénévole (ex: Samir)" required />
+        <input id="ben-role" placeholder="Rôle (ex: Traduction Arabe/Français)" required />
+        <button type="submit">Enregistrer le bénévole</button>
+      </form>
+      <ul id="list-bens"></ul>
+    </section>
+  </main>
+
+  <script>
+    async function chargerDonnees() {
+      const res = await fetch('/api/associations/synthese');
+      const data = await res.json();
+
+      const badge = document.getElementById('comm-status');
+      badge.textContent = 'Liaison K8s : ' + data.statutCommunication;
+      if (!data.statutCommunication.startsWith('OK')) badge.classList.add('err');
+
+      const listAssos = document.getElementById('list-assos');
+      listAssos.innerHTML = data.associations.map(a => `
+        <li>
+          <div><strong>${a.nom}</strong><div class="sub">${a.domaine} — ${a.adresse || 'Non précisée'}</div></div>
+          <button class="del" onclick="supprimerAsso('${a.id}')">Supprimer</button>
+        </li>
+      `).join('');
+
+      const listBens = document.getElementById('list-bens');
+      listBens.innerHTML = data.benevoles.map(b => `
+        <li>
+          <div><strong>${b.nom}</strong><div class="sub">Rôle : ${b.role}</div></div>
+        </li>
+      `).join('');
+    }
+
+    document.getElementById('form-asso').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await fetch('/api/associations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nom: document.getElementById('asso-nom').value,
+          domaine: document.getElementById('asso-domaine').value,
+          adresse: document.getElementById('asso-adresse').value
+        })
+      });
+      e.target.reset();
+      chargerDonnees();
+    });
+
+    document.getElementById('form-ben').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await fetch('/api/benevoles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nom: document.getElementById('ben-nom').value,
+          role: document.getElementById('ben-role').value
+        })
+      });
+      e.target.reset();
+      chargerDonnees();
+    });
+
+    async function supprimerAsso(id) {
+      await fetch('/api/associations/' + id, { method: 'DELETE' });
+      chargerDonnees();
+    }
+
+    chargerDonnees();
+  </script>
+</body>
+</html>
