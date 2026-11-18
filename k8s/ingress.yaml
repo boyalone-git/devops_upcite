@@ -2,10 +2,17 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: solidarite-gateway
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - localhost
+      secretName: solidarite-tls
   rules:
-    - http:
+    - host: localhost
+      http:
         paths:
           - path: /api/benevoles
             pathType: Prefix
