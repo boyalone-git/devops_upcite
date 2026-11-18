@@ -1,26 +1,29 @@
 package com.projet.benevoles;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import java.util.UUID;
 
+@Entity
+@Table(name = "benevoles")
 public class Benevole {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @NotBlank(message = "Le nom est obligatoire")
     private String nom;
 
-    @NotBlank(message = "Le rôle est obligatoire (ex: Traduction, Accueil)")
+    @NotBlank(message = "Le rôle est obligatoire")
     private String role;
 
     public Benevole() {}
 
     public Benevole(String nom, String role) {
-        this.id = UUID.randomUUID().toString();
         this.nom = nom;
         this.role = role;
     }
 
-    // Getters et Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     public String getNom() { return nom; }

@@ -1,16 +1,41 @@
-version: '3.8'
-
 services:
   annuaire:
-    build: 
+    build:
       context: ./annuaire
     ports:
       - "8080:8080"
     container_name: service-annuaire
 
   benevoles:
-    build: 
+    build:
       context: ./benevoles
     ports:
       - "8081:8081"
     container_name: service-benevoles
+    depends_on:
+      db-benevoles:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-benevoles:5432/benevoles_db
+      SPRING_DATASOURCE_USERNAME: user_dev
+      SPRING_DATASOURCE_PASSWORD: password_dev
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+  db-benevoles:
+    image: postgres:16-alpine
+    container_name: db-benevoles
+    environment:
+      POSTGRES_DB: benevoles_db
+      POSTGRES_USER: user_dev
+      POSTGRES_PASSWORD: password_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_dev -d benevoles_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_benevoles_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_benevoles_data:
