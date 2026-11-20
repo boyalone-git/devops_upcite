@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Trouver de l'aide près de chez vous : repas, hébergement, démarches, droits, santé, cours de français." />
+  <meta name="referrer" content="no-referrer" />
+  <title>Solidarité Arrivants</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#contenu" data-i18n="skip">Aller au contenu</a>
+
+  <!-- Urgences : toujours visibles -->
+  <div class="urgent" role="region" aria-label="Urgences" data-i18n-aria="urgent_label">
+    <div class="wrap urgent-inner">
+      <a href="tel:112"><span class="urgent-num">112</span><span data-i18n="urgent_danger">Urgence / danger</span></a>
+      <a href="tel:115"><span class="urgent-num">115</span><span data-i18n="urgent_115">Besoin d'un hébergement ce soir (gratuit, 24h/24)</span></a>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="#">
+        <svg viewBox="0 0 36 36" aria-hidden="true">
+          <circle cx="14" cy="18" r="10" fill="#0f5f56" />
+          <circle cx="22" cy="18" r="10" fill="#c8562a" fill-opacity=".85" />
+        </svg>
+        Solidarité Arrivants
+      </a>
+      <div class="lang" role="group" aria-label="Langue" data-i18n-aria="lang_label">
+        <button type="button" data-lang="fr" lang="fr">Français</button>
+        <button type="button" data-lang="en" lang="en">English</button>
+        <button type="button" data-lang="ar" lang="ar" dir="rtl">العربية</button>
+      </div>
+    </div>
+
+    <div class="wrap hero">
+      <h1 data-i18n="tagline">Trouver de l'aide près de chez vous.</h1>
+      <p data-i18n="hero_sub">Repas, hébergement, démarches, santé, cours de français : les associations et bénévoles de votre ville.</p>
+    </div>
+
+    <nav class="wrap tabs" aria-label="Sections">
+      <button type="button" data-vue="vue-aide" aria-current="page" data-i18n="tab_help">Trouver de l'aide</button>
+      <button type="button" data-vue="vue-benevole" data-i18n="tab_volunteer">Devenir bénévole</button>
+      <button type="button" data-vue="vue-assos" data-i18n="tab_orgs">Espace associations</button>
+    </nav>
+  </header>
+
+  <main id="contenu" class="wrap" tabindex="-1">
+
+    <!-- ===== Vue 1 : trouver de l'aide ===== -->
+    <section id="vue-aide" class="vue" aria-labelledby="titre-besoin">
+      <h2 id="titre-besoin" data-i18n="need_q">De quoi avez-vous besoin ?</h2>
+      <div id="besoins" class="besoins"></div>
+
+      <div class="filtres">
+        <div>
+          <label class="sr-only" for="recherche" data-i18n="search_label">Rechercher</label>
+          <input type="search" id="recherche" data-i18n-ph="search_ph" placeholder="Rechercher une association…" />
+        </div>
+        <div>
+          <label class="sr-only" for="ville" data-i18n="city_label">Ville</label>
+          <select id="ville"></select>
+        </div>
+      </div>
+
+      <p id="resume" class="resume" aria-live="polite"></p>
+
+      <h3 data-i18n="results_orgs">Associations</h3>
+      <ul id="resultats-assos" class="cartes"></ul>
+
+      <div id="bloc-bens" hidden>
+        <h3 data-i18n="results_vols">Bénévoles disponibles</h3>
+        <ul id="resultats-bens" class="cartes"></ul>
+      </div>
+    </section>
+
+    <!-- ===== Vue 2 : devenir bénévole ===== -->
+    <section id="vue-benevole" class="vue" hidden>
+      <div class="split">
+        <div class="panel">
+          <h2 data-i18n="vol_title">Proposer votre aide</h2>
+          <p class="muted" data-i18n="vol_intro">Traduction, accompagnement aux démarches, hébergement d'urgence… chaque compétence compte.</p>
+          <form id="form-ben" class="form">
+            <label for="ben-nom" data-i18n="f_name">Votre prénom</label>
+            <input id="ben-nom" name="nom" required maxlength="120" autocomplete="given-name" />
+            <label for="ben-role" data-i18n="f_mission">Ce que vous proposez</label>
+            <input id="ben-role" name="role" list="missions" required maxlength="160" />
+            <datalist id="missions">
+              <option value="Traduction arabe / français"></option>
+              <option value="Traduction anglais / français"></option>
+              <option value="Accompagnement administratif"></option>
+              <option value="Hébergement d'urgence"></option>
+              <option value="Cours de français"></option>
+              <option value="Accompagnement santé"></option>
+            </datalist>
+            <button type="submit" class="btn" data-i18n="btn_vol">Je m'inscris</button>
+            <p id="msg-ben" class="msg" role="status" hidden></p>
+          </form>
+        </div>
+        <div>
+          <h2 data-i18n="vol_list">Bénévoles inscrits</h2>
+          <ul id="liste-bens" class="cartes"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Vue 3 : espace associations ===== -->
+    <section id="vue-assos" class="vue" hidden>
+      <div class="split">
+        <div class="panel">
+          <h2 data-i18n="org_title">Référencer une association</h2>
+          <p class="note" data-i18n="org_note">Espace réservé aux associations. Authentification à venir.</p>
+          <form id="form-asso" class="form">
+            <label for="asso-nom" data-i18n="f_org">Nom de l'association</label>
+            <input id="asso-nom" name="nom" required maxlength="120" autocomplete="organization" />
+            <label for="asso-domaine" data-i18n="f_domain">Domaine d'action</label>
+            <input id="asso-domaine" name="domaine" list="domaines" required maxlength="120" />
+            <datalist id="domaines">
+              <option value="Aide alimentaire"></option>
+              <option value="Hébergement d'urgence"></option>
+              <option value="Accompagnement administratif"></option>
+              <option value="Aide juridique"></option>
+              <option value="Santé"></option>
+              <option value="Cours de français"></option>
+            </datalist>
+            <label for="asso-adresse"><span data-i18n="f_city">Ville / adresse</span> <span class="optional" data-i18n="optional">(facultatif)</span></label>
+            <input id="asso-adresse" name="adresse" maxlength="200" />
+            <button type="submit" class="btn" data-i18n="btn_org">Ajouter</button>
+            <p id="msg-asso" class="msg" role="status" hidden></p>
+          </form>
+        </div>
+        <div>
+          <h2 data-i18n="org_list">Associations référencées</h2>
+          <ul id="liste-assos" class="cartes"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <span>Solidarité Arrivants</span>
+      <span><span data-i18n="status">État des services</span> : <span id="statut" class="pastille">…</span></span>
+    </div>
+  </footer>
+
+  <script>
+    /* ---------- Traductions ---------- */
+    const I18N = {
+      fr: {
+        skip: "Aller au contenu", urgent_label: "Urgences", lang_label: "Langue",
+        urgent_danger: "Urgence / danger", urgent_115: "Besoin d'un hébergement ce soir (gratuit, 24h/24)",
+        tagline: "Trouver de l'aide près de chez vous.",
+        hero_sub: "Repas, hébergement, démarches, santé, cours de français : les associations et bénévoles de votre ville.",
+        tab_help: "Trouver de l'aide", tab_volunteer: "Devenir bénévole", tab_orgs: "Espace associations",
+        need_q: "De quoi avez-vous besoin ?",
+        cat_tout: "Tout voir", cat_manger: "Manger", cat_dormir: "Dormir", cat_papiers: "Papiers",
+        cat_droits: "Droits", cat_sante: "Santé", cat_francais: "Français",
+        search_label: "Rechercher", search_ph: "Rechercher une association…",
+        city_label: "Ville", city_all: "Toutes les villes",
+        results_orgs: "Associations", results_vols: "Bénévoles disponibles",
+        found_one: "1 association trouvée", found_many: "{n} associations trouvées",
+        no_results: "Aucun résultat. Essayez « Tout voir » ou une autre ville.",
+        no_address: "Adresse non précisée", see_map: "Voir sur la carte",
+        loading: "Chargement…", error_load: "Le service est momentanément indisponible.",
+        vol_title: "Proposer votre aide",
+        vol_intro: "Traduction, accompagnement aux démarches, hébergement d'urgence… chaque compétence compte.",
+        f_name: "Votre prénom", f_mission: "Ce que vous proposez", btn_vol: "Je m'inscris",
+        vol_list: "Bénévoles inscrits", ok_vol: "Merci ! Votre inscription est enregistrée.",
+        org_title: "Référencer une association",
+        org_note: "Espace réservé aux associations. Authentification à venir.",
+        f_org: "Nom de l'association", f_domain: "Domaine d'action", f_city: "Ville / adresse",
+        optional: "(facultatif)", btn_org: "Ajouter", org_list: "Associations référencées",
+        ok_org: "Association ajoutée.", delete: "Supprimer", confirm_del: "Supprimer « {nom} » ?",
+        err_save: "L'enregistrement a échoué. Réessayez.", err_del: "La suppression a échoué.",
+        empty_orgs: "Aucune association pour le moment.", empty_vols: "Aucun bénévole inscrit pour le moment.",
+        status: "État des services", status_ok: "Opérationnels", status_ko: "Indisponibles"
+      },
+      en: {
+        skip: "Skip to content", urgent_label: "Emergencies", lang_label: "Language",
+        urgent_danger: "Emergency", urgent_115: "Need shelter tonight (free, 24/7)",
+        tagline: "Find help near you.",
+        hero_sub: "Food, shelter, paperwork, health, French lessons: organisations and volunteers in your city.",
+        tab_help: "Find help", tab_volunteer: "Volunteer", tab_orgs: "For organisations",
+        need_q: "What do you need?",
+        cat_tout: "See all", cat_manger: "Food", cat_dormir: "Shelter", cat_papiers: "Paperwork",
+        cat_droits: "Legal help", cat_sante: "Health", cat_francais: "Learn French",
+        search_label: "Search", search_ph: "Search an organisation…",
+        city_label: "City", city_all: "All cities",
+        results_orgs: "Organisations", results_vols: "Available volunteers",
+        found_one: "1 organisation found", found_many: "{n} organisations found",
+        no_results: "No results. Try “See all” or another city.",
+        no_address: "Address not specified", see_map: "See on map",
+        loading: "Loading…", error_load: "The service is temporarily unavailable.",
+        vol_title: "Offer your help",
+        vol_intro: "Translation, help with paperwork, emergency housing… every skill counts.",
+        f_name: "Your first name", f_mission: "What you offer", btn_vol: "Sign up",
+        vol_list: "Registered volunteers", ok_vol: "Thank you! You're registered.",
+        org_title: "List an organisation",
+        org_note: "Reserved for organisations. Login coming soon.",
+        f_org: "Organisation name", f_domain: "Field of action", f_city: "City / address",
+        optional: "(optional)", btn_org: "Add", org_list: "Listed organisations",
+        ok_org: "Organisation added.", delete: "Delete", confirm_del: "Delete “{nom}”?",
+        err_save: "Saving failed. Please try again.", err_del: "Deletion failed.",
+        empty_orgs: "No organisations yet.", empty_vols: "No volunteers yet.",
+        status: "Service status", status_ok: "Operational", status_ko: "Unavailable"
+      },
+      ar: {
+        skip: "انتقل إلى المحتوى", urgent_label: "الطوارئ", lang_label: "اللغة",
+        urgent_danger: "حالة طوارئ", urgent_115: "تحتاج إلى مأوى الليلة (مجاني، على مدار الساعة)",
+        tagline: "اعثر على المساعدة بالقرب منك.",
+        hero_sub: "الطعام، السكن، الإجراءات الإدارية، الصحة، دروس الفرنسية: الجمعيات والمتطوعون في مدينتك.",
+        tab_help: "البحث عن مساعدة", tab_volunteer: "التطوع", tab_orgs: "مساحة الجمعيات",
+        need_q: "ماذا تحتاج؟",
+        cat_tout: "عرض الكل", cat_manger: "الطعام", cat_dormir: "المأوى", cat_papiers: "الأوراق الإدارية",
+        cat_droits: "المساعدة القانونية", cat_sante: "الصحة", cat_francais: "تعلم الفرنسية",
+        search_label: "بحث", search_ph: "ابحث عن جمعية…",
+        city_label: "المدينة", city_all: "كل المدن",
+        results_orgs: "الجمعيات", results_vols: "متطوعون متاحون",
+        found_one: "تم العثور على جمعية واحدة", found_many: "عدد الجمعيات: {n}",
+        no_results: "لا توجد نتائج. جرّب «عرض الكل» أو مدينة أخرى.",
+        no_address: "العنوان غير محدد", see_map: "عرض على الخريطة",
+        loading: "جارٍ التحميل…", error_load: "الخدمة غير متاحة مؤقتًا.",
+        vol_title: "اعرض مساعدتك",
+        vol_intro: "الترجمة، المرافقة في الإجراءات الإدارية، الإيواء الطارئ… كل مهارة مهمة.",
+        f_name: "اسمك", f_mission: "ما الذي تقدمه", btn_vol: "سجّلني",
+        vol_list: "المتطوعون المسجلون", ok_vol: "شكرًا! تم تسجيلك.",
+        org_title: "تسجيل جمعية",
+        org_note: "مساحة مخصصة للجمعيات. تسجيل الدخول قريبًا.",
+        f_org: "اسم الجمعية", f_domain: "مجال النشاط", f_city: "المدينة / العنوان",
+        optional: "(اختياري)", btn_org: "إضافة", org_list: "الجمعيات المسجلة",
+        ok_org: "تمت إضافة الجمعية.", delete: "حذف", confirm_del: "حذف «{nom}»؟",
+        err_save: "فشل الحفظ. حاول مرة أخرى.", err_del: "فشل الحذف.",
+        empty_orgs: "لا توجد جمعيات حاليًا.", empty_vols: "لا يوجد متطوعون حاليًا.",
+        status: "حالة الخدمات", status_ok: "تعمل", status_ko: "غير متاحة"
+      }
+    };
+
+    /* ---------- Besoins : mots-clés recherchés dans le domaine / rôle ---------- */
+    const CATEGORIES = [
+      { id: 'tout',     icone: '✦',  mots: [] },
+      { id: 'manger',   icone: '🍲', mots: ['aliment', 'repas', 'manger', 'nourri', 'epicerie', 'colis', 'resto'] },
+      { id: 'dormir',   icone: '🛏️', mots: ['heberg', 'logement', 'dormir', 'abri', 'nuit', 'maraude'] },
+      { id: 'papiers',  icone: '📄', mots: ['administratif', 'papier', 'demarche', 'prefecture', 'sejour', 'asile', 'ofpra'] },
+      { id: 'droits',   icone: '⚖️', mots: ['juridique', 'droit', 'avocat', 'juriste', 'legal'] },
+      { id: 'sante',    icone: '🩺', mots: ['sante', 'soin', 'medical', 'medecin', 'psy'] },
+      { id: 'francais', icone: '🗣️', mots: ['francais', 'fle', 'langue', 'alphabet', 'cours de', 'traduct', 'interpret'] }
+    ];
+
+    /* ---------- Outils ---------- */
+    const $ = (id) => document.getElementById(id);
+    const norm = (s) => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const echapper = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const valeurs = (form) =>
+      Object.fromEntries([...new FormData(form)].map(([k, v]) => [k, String(v).trim()]));
+
+    const etat = {
+      lang: 'fr', categorie: 'tout', recherche: '', ville: '',
+      assos: [], bens: [], charge: false, erreur: false, statut: null
+    };
+
+    function t(cle, vars = {}) {
+      const txt = I18N[etat.lang]?.[cle] ?? I18N.fr[cle] ?? cle;
+      return txt.replace(/\{(\w+)\}/g, (_, k) => vars[k] ?? '');
+    }
+
+    const villeDe = (adresse) =>
+      adresse ? adresse.split(',').pop().replace(/\b\d{5}\b/g, '').trim() : '';
+
+    const correspond = (texte, cat) =>
+      cat.id === 'tout' || cat.mots.some((m) => norm(texte).includes(m));
+
+    const vide = (txt) => `<li class="carte vide">${echapper(txt)}</li>`;
+
+    /* ---------- Gabarits ---------- */
+    function carteAsso(a, gestion = false) {
+      const carte = a.adresse
+        ? `<a class="lien" href="https://www.openstreetmap.org/search?query=${encodeURIComponent(a.adresse)}"
+              target="_blank" rel="noopener noreferrer">${t('see_map')}</a>`
+        : '';
+      const suppr = gestion
+        ? `<button type="button" class="btn-suppr" data-id="${echapper(a.id)}" data-nom="${echapper(a.nom)}">${t('delete')}</button>`
+        : '';
+      return `
+        <li class="carte">
+          <span class="tag">${echapper(a.domaine)}</span>
+          <h4>${echapper(a.nom)}</h4>
+          <p class="lieu">📍 ${a.adresse ? echapper(a.adresse) : t('no_address')}</p>
+          ${gestion ? suppr : carte}
+        </li>`;
+    }
+
+    function carteBen(b) {
+      const initiale = (String(b.nom ?? '?').trim().charAt(0) || '?').toUpperCase();
+      return `
+        <li class="carte carte-ben">
+          <span class="avatar" aria-hidden="true">${echapper(initiale)}</span>
+          <div><strong>${echapper(b.nom)}</strong><span class="muted">${echapper(b.role)}</span></div>
+        </li>`;
+    }
+
+    /* ---------- Rendu ---------- */
+    function rendreBesoins() {
+      $('besoins').innerHTML = CATEGORIES.map((c) => `
+        <button type="button" class="besoin" data-cat="${c.id}" aria-pressed="${c.id === etat.categorie}">
+          <span class="besoin-icone" aria-hidden="true">${c.icone}</span>
+          <span>${t('cat_' + c.id)}</span>
+        </button>`).join('');
+    }
+
+    function rendreVilles() {
+      const villes = [...new Set(etat.assos.map((a) => villeDe(a.adresse)).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'fr'));
+      if (!villes.includes(etat.ville)) etat.ville = '';
+      $('ville').innerHTML = `<option value="">${t('city_all')}</option>` +
+        villes.map((v) => `<option value="${echapper(v)}"${v === etat.ville ? ' selected' : ''}>${echapper(v)}</option>`).join('');
+    }
+
+    function rendreResultats() {
+      const ulA = $('resultats-assos');
+      if (!etat.charge) {
+        ulA.innerHTML = vide(etat.erreur ? t('error_load') : t('loading'));
+        $('bloc-bens').hidden = true;
+        $('resume').textContent = '';
+        return;
+      }
+      const cat = CATEGORIES.find((c) => c.id === etat.categorie);
+      const q = norm(etat.recherche.trim());
+
+      const assos = etat.assos.filter((a) =>
+        correspond(a.domaine, cat) &&
+        (!etat.ville || villeDe(a.adresse) === etat.ville) &&
+        (!q || norm(`${a.nom} ${a.domaine} ${a.adresse ?? ''}`).includes(q)));
+
+      const bens = etat.bens.filter((b) =>
+        correspond(b.role, cat) && (!q || norm(`${b.nom} ${b.role}`).includes(q)));
+
+      $('resume').textContent = assos.length === 0 ? ''
+        : assos.length === 1 ? t('found_one') : t('found_many', { n: assos.length });
+      ulA.innerHTML = assos.length ? assos.map((a) => carteAsso(a)).join('') : vide(t('no_results'));
+
+      $('bloc-bens').hidden = bens.length === 0;
+      $('resultats-bens').innerHTML = bens.map(carteBen).join('');
+    }
+
+    function rendreGestion() {
+      const liste = (items, rendu, cleVide) =>
+        !etat.charge ? vide(etat.erreur ? t('error_load') : t('loading'))
+          : items.length ? items.map(rendu).join('') : vide(t(cleVide));
+      $('liste-bens').innerHTML = liste(etat.bens, carteBen, 'empty_vols');
+      $('liste-assos').innerHTML = liste(etat.assos, (a) => carteAsso(a, true), 'empty_orgs');
+    }
+
+    function rendreStatut() {
+      const el = $('statut');
+      if (etat.statut == null) { el.className = 'pastille'; el.textContent = '…'; return; }
+      const ok = etat.statut.startsWith('OK');
+      el.className = 'pastille ' + (ok ? 'ok' : 'ko');
+      el.textContent = t(ok ? 'status_ok' : 'status_ko');
+      el.title = etat.statut;
+    }
+
+    function rendre() {
+      rendreBesoins();
+      rendreVilles();
+      rendreResultats();
+      rendreGestion();
+      rendreStatut();
+    }
+
+    /* ---------- Langue & navigation ---------- */
+    function appliquerLangue(lang) {
+      etat.lang = I18N[lang] ? lang : 'fr';
+      try { localStorage.setItem('sa-lang', etat.lang); } catch (e) {}
+      document.documentElement.lang = etat.lang;
+      document.documentElement.dir = etat.lang === 'ar' ? 'rtl' : 'ltr';
+      document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+      document.querySelectorAll('[data-i18n-ph]').forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+      document.querySelectorAll('[data-i18n-aria]').forEach((el) => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+      document.querySelectorAll('[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === etat.lang)));
+      rendre();
+    }
+
+    function afficherVue(id) {
+      document.querySelectorAll('.vue').forEach((s) => { s.hidden = s.id !== id; });
+      document.querySelectorAll('[data-vue]').forEach((b) => {
+        if (b.dataset.vue === id) b.setAttribute('aria-current', 'page');
+        else b.removeAttribute('aria-current');
+      });
+    }
+
+    /* ---------- API ---------- */
+    async function chargerDonnees() {
+      try {
+        const res = await fetch('/api/associations/synthese');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        etat.assos = data.associations || [];
+        etat.bens = data.benevoles || [];
+        etat.statut = data.statutCommunication || 'inconnu';
+        etat.charge = true;
+        etat.erreur = false;
+      } catch (err) {
+        console.error(err);
+        etat.erreur = true;
+        etat.statut = 'KO : ' + err.message;
+      }
+      rendre();
+    }
+
+    function message(el, texte, ok) {
+      el.textContent = texte;
+      el.className = 'msg ' + (ok ? 'msg-ok' : 'msg-err');
+      el.hidden = !texte;
+    }
+
+    async function soumettre(form, url, msgId, cleOk) {
+      const bouton = form.querySelector('button[type="submit"]');
+      const msg = $(msgId);
+      bouton.disabled = true;
+      message(msg, '', true);
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(valeurs(form))
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        form.reset();
+        message(msg, t(cleOk), true);
+        await chargerDonnees();
+      } catch (err) {
+        console.error(err);
+        message(msg, t('err_save'), false);
+      } finally {
+        bouton.disabled = false;
+      }
+    }
+
+    /* ---------- Événements ---------- */
+    $('besoins').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-cat]');
+      if (!b) return;
+      etat.categorie = b.dataset.cat;
+      document.querySelectorAll('.besoin').forEach((x) =>
+        x.setAttribute('aria-pressed', String(x.dataset.cat === etat.categorie)));
+      rendreResultats();
+    });
+
+    $('recherche').addEventListener('input', (e) => { etat.recherche = e.target.value; rendreResultats(); });
+    $('ville').addEventListener('change', (e) => { etat.ville = e.target.value; rendreResultats(); });
+
+    document.querySelectorAll('[data-lang]').forEach((b) =>
+      b.addEventListener('click', () => appliquerLangue(b.dataset.lang)));
+    document.querySelectorAll('[data-vue]').forEach((b) =>
+      b.addEventListener('click', () => afficherVue(b.dataset.vue)));
+
+    $('form-ben').addEventListener('submit', (e) => {
+      e.preventDefault();
+      soumettre(e.target, '/api/benevoles', 'msg-ben', 'ok_vol');
+    });
+    $('form-asso').addEventListener('submit', (e) => {
+      e.preventDefault();
+      soumettre(e.target, '/api/associations', 'msg-asso', 'ok_org');
+    });
+
+    $('liste-assos').addEventListener('click', async (e) => {
+      const bouton = e.target.closest('.btn-suppr');
+      if (!bouton || !confirm(t('confirm_del', { nom: bouton.dataset.nom }))) return;
+      bouton.disabled = true;
+      try {
+        const res = await fetch('/api/associations/' + encodeURIComponent(bouton.dataset.id), { method: 'DELETE' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        await chargerDonnees();
+      } catch (err) {
+        console.error(err);
+        bouton.disabled = false;
+        message($('msg-asso'), t('err_del'), false);
+      }
+    });
+
+    /* ---------- Démarrage ---------- */
+    let langue = '';
+    try { langue = localStorage.getItem('sa-lang') || ''; } catch (e) {}
+    if (!I18N[langue]) langue = (navigator.language || 'fr').slice(0, 2);
+    appliquerLangue(langue);
+    chargerDonnees();
+  </script>
+</body>
+</html>

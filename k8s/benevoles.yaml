@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-benevoles
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-benevoles
+  template:
+    metadata:
+      labels:
+        app: service-benevoles
+    spec:
+      serviceAccountName: solidarite-sa
+      containers:
+        - name: benevoles
+          image: quelebara/service-benevoles:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081
+          env:
+            - name: SERVER_PORT
+              value: "8081"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://db-benevoles:5432/benevoles_db
+            - name: SPRING_DATASOURCE_USERNAME
+              value: user_dev
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: password_dev
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-benevoles
+spec:
+  selector:
+    app: service-benevoles
+  ports:
+    - port: 8081
+      targetPort: 8081

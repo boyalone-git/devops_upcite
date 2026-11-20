@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-annuaire
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-annuaire
+  template:
+    metadata:
+      labels:
+        app: service-annuaire
+    spec:
+      serviceAccountName: solidarite-sa
+      containers:
+        - name: annuaire
+          image: quelebara/service-annuaire:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-annuaire
+spec:
+  selector:
+    app: service-annuaire
+  ports:
+    - port: 8080
+      targetPort: 8080
